@@ -28,6 +28,7 @@ async def test_message_from_allowed_chat_goes_to_bus():
         update.message.text = "hello bot"
 
         await connector._on_message(update, MagicMock())
+        await bus.run_once()
 
     assert len(received) == 1
     assert received[0].text == "hello bot"

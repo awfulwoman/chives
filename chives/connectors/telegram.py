@@ -33,8 +33,6 @@ class TelegramConnector:
             text=update.message.text or "",
         )
         await self.bus.put(msg)
-        for handler in self.bus._handlers:
-            await handler(msg)
 
     async def run(self) -> None:
         await self.app.run_polling()
