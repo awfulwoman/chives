@@ -1,8 +1,11 @@
 from __future__ import annotations
+import json as _json
+from datetime import datetime, timezone, timedelta
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from chives.config import Config
 from chives.store import Store
+from chives.tools.registry import dispatch_tool
 
 
 class Scheduler:
@@ -50,18 +53,10 @@ class Scheduler:
             self.store.mark_nudge_fired(nudge["id"])
 
     async def _check_event_reminders(self) -> None:
-        from datetime import datetime, timezone, timedelta
-        import json as _json
-        from chives.tools.registry import _registry
-
-        list_events = _registry.get("list_calendar_events")
-        if list_events is None:
-            return
-
         try:
-            raw = list_events(period="today")
+            raw = await dispatch_tool("list_calendar_events", _json.dumps({"period": "today"}))
             events = _json.loads(raw)
-        except Exception:
+        except (KeyError, Exception):
             return
 
         now = datetime.now(timezone.utc)
@@ -69,7 +64,10 @@ class Scheduler:
         for ev in events:
             try:
                 start_str = ev.get("start", "")
-                start = datetime.fromisoformat(start_str[:19])
+                try:
+                    start = datetime.fromisoformat(start_str)
+                except ValueError:
+                    start = datetime.fromisoformat(start_str[:19]).replace(tzinfo=timezone.utc)
                 if start.tzinfo is None:
                     start = start.replace(tzinfo=timezone.utc)
                 delta = (start - now).total_seconds() / 60

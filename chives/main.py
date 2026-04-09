@@ -43,9 +43,13 @@ async def main() -> None:
     )
 
     async def handle_message(msg):
-        response = await pipeline(msg)
-        if response:
-            await telegram.send(msg.chat_id, response)
+        try:
+            response = await pipeline(msg)
+            if response:
+                await telegram.send(msg.chat_id, response)
+        except Exception as exc:
+            import logging
+            logging.getLogger(__name__).exception("Error handling message: %s", exc)
 
     bus.add_handler(handle_message)
 

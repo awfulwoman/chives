@@ -5,6 +5,13 @@ PLIST_LABEL="com.chives.agent"
 REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 PLIST_PATH="$HOME/Library/LaunchAgents/${PLIST_LABEL}.plist"
 
+UV_PATH="$(which uv 2>/dev/null || true)"
+if [ -z "$UV_PATH" ]; then
+    echo "Error: uv not found on PATH. Install uv first."
+    exit 1
+fi
+
+mkdir -p "$HOME/Library/LaunchAgents"
 cat > "$PLIST_PATH" <<PLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -14,7 +21,7 @@ cat > "$PLIST_PATH" <<PLIST
     <string>${PLIST_LABEL}</string>
     <key>ProgramArguments</key>
     <array>
-        <string>$(which uv)</string>
+        <string>${UV_PATH}</string>
         <string>run</string>
         <string>python</string>
         <string>-m</string>
