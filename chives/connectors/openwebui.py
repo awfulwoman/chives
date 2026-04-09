@@ -27,7 +27,7 @@ def create_app(agent_run: Callable[[str, str, str], Awaitable[str]]) -> FastAPI:
         return {
             "object": "list",
             "data": [{
-                "id": "chives",
+                "id": "chives-agent",
                 "object": "model",
                 "created": int(time.time()),
                 "owned_by": "local",
@@ -49,7 +49,7 @@ def create_app(agent_run: Callable[[str, str, str], Awaitable[str]]) -> FastAPI:
                     "id": completion_id,
                     "object": "chat.completion.chunk",
                     "created": int(time.time()),
-                    "model": "chives",
+                    "model": "chives-agent",
                     "choices": [{"index": 0, "delta": {"content": response}, "finish_reason": None}],
                 }
                 yield f"data: {json.dumps(chunk)}\n\n"
@@ -57,7 +57,7 @@ def create_app(agent_run: Callable[[str, str, str], Awaitable[str]]) -> FastAPI:
                     "id": completion_id,
                     "object": "chat.completion.chunk",
                     "created": int(time.time()),
-                    "model": "chives",
+                    "model": "chives-agent",
                     "choices": [{"index": 0, "delta": {}, "finish_reason": "stop"}],
                 }
                 yield f"data: {json.dumps(done_chunk)}\n\n"
@@ -70,7 +70,7 @@ def create_app(agent_run: Callable[[str, str, str], Awaitable[str]]) -> FastAPI:
             "id": completion_id,
             "object": "chat.completion",
             "created": int(time.time()),
-            "model": "chives",
+            "model": "chives-agent",
             "choices": [{
                 "index": 0,
                 "message": {"role": "assistant", "content": response},
