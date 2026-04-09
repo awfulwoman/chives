@@ -1,4 +1,3 @@
-import os
 import pytest
 from chives.config import Config
 

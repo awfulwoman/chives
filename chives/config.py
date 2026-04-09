@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing import List
 
 
 class LLMConfig(BaseModel):
@@ -11,7 +10,7 @@ class LLMConfig(BaseModel):
 
 class TelegramConfig(BaseModel):
     bot_token: str = ""
-    allowed_chat_ids: List[int] = []
+    allowed_chat_ids: list[int] = []
 
 
 class IMAPConfig(BaseModel):
