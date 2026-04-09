@@ -47,5 +47,5 @@ cat > "$PLIST_PATH" <<PLIST
 PLIST
 
 mkdir -p "${REPO_DIR}/logs"
-launchctl bootstrap gui/$(id -u) "$PLIST_PATH"
+launchctl bootstrap gui/$(id -u) "$PLIST_PATH" || true
 echo "Chives service installed and started."

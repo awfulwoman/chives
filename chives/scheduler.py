@@ -56,7 +56,9 @@ class Scheduler:
         try:
             raw = await dispatch_tool("list_calendar_events", _json.dumps({"period": "today"}))
             events = _json.loads(raw)
-        except (KeyError, Exception):
+            if not isinstance(events, list):
+                return
+        except Exception:
             return
 
         now = datetime.now(timezone.utc)

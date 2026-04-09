@@ -1,5 +1,6 @@
 from __future__ import annotations
 import asyncio
+import logging
 import uvicorn
 from chives.config import Config
 from chives.store import Store
@@ -48,7 +49,6 @@ async def main() -> None:
             if response:
                 await telegram.send(msg.chat_id, response)
         except Exception as exc:
-            import logging
             logging.getLogger(__name__).exception("Error handling message: %s", exc)
 
     bus.add_handler(handle_message)
