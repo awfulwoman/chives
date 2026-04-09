@@ -1,4 +1,5 @@
 from __future__ import annotations
+import asyncio
 from telegram import Update
 from telegram.ext import Application, MessageHandler, filters, ContextTypes
 from chives.bus import Bus, Message
@@ -35,4 +36,7 @@ class TelegramConnector:
         await self.bus.put(msg)
 
     async def run(self) -> None:
-        await self.app.run_polling()
+        async with self.app:
+            await self.app.start()
+            await self.app.updater.start_polling()
+            await asyncio.Event().wait()  # run until cancelled
