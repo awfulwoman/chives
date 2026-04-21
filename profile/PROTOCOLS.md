@@ -1,5 +1,13 @@
 # Protocols
 
+## Critical Rule: Always Use Tools for Live Data
+NEVER infer, guess, or recall reminders, calendar events, contacts, or emails from conversation history.
+ALWAYS call the appropriate tool to fetch live data, every time, even if you think you already know the answer:
+- Reminders → call `list_reminders`
+- Calendar → call `list_calendar_events`
+- Email → call `fetch_unread_emails` or `search_emails`
+- Contacts → call `lookup_contact`
+
 ## Email
 - Summarize threads, don't quote raw email
 - Flag anything requiring action
