@@ -63,7 +63,23 @@ INSERT OR REPLACE INTO access
   (service, client, client_type, auth_value, auth_reason, auth_version, csreq, indirect_object_identifier)
 VALUES
   ('kTCCServiceCalendar', '$UV_REAL', 1, 2, 3, 1, NULL, 'UNUSED');
-" && echo "Calendar TCC permissions granted."
+INSERT OR REPLACE INTO access
+  (service, client, client_type, auth_value, auth_reason, auth_version, csreq, indirect_object_identifier)
+VALUES
+  ('kTCCServiceReminders', 'org.python.python', 0, 2, 3, 1, NULL, 'UNUSED');
+INSERT OR REPLACE INTO access
+  (service, client, client_type, auth_value, auth_reason, auth_version, csreq, indirect_object_identifier)
+VALUES
+  ('kTCCServiceReminders', '$UV_REAL', 1, 2, 3, 1, NULL, 'UNUSED');
+INSERT OR REPLACE INTO access
+  (service, client, client_type, auth_value, auth_reason, auth_version, csreq, indirect_object_identifier)
+VALUES
+  ('kTCCServiceAddressBook', 'org.python.python', 0, 2, 3, 1, NULL, 'UNUSED');
+INSERT OR REPLACE INTO access
+  (service, client, client_type, auth_value, auth_reason, auth_version, csreq, indirect_object_identifier)
+VALUES
+  ('kTCCServiceAddressBook', '$UV_REAL', 1, 2, 3, 1, NULL, 'UNUSED');
+" && echo "Calendar, Reminders, and Contacts TCC permissions granted."
 
 launchctl bootstrap gui/$(id -u) "$PLIST_PATH" || true
 echo "Chives service installed and started."
