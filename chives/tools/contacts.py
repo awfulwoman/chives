@@ -10,8 +10,18 @@ def _get_store():
     if _cn_store is not None:
         return _cn_store
     import Contacts
+    import threading
 
     store = Contacts.CNContactStore.alloc().init()
+    done = threading.Event()
+
+    def cb(granted, error):
+        done.set()
+
+    store.requestAccessForEntityType_completionHandler_(
+        Contacts.CNEntityTypeContacts, cb
+    )
+    done.wait(timeout=10)
     _cn_store = store
     return store
 
