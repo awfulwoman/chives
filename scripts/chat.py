@@ -16,7 +16,6 @@ logging.basicConfig(
 from chives.config import Config
 from chives.store import Store
 from chives.agent import Agent
-from chives.tools.registry import clear_registry
 import chives.tools.calendar  # noqa: F401
 import chives.tools.reminders  # noqa: F401
 import chives.tools.contacts  # noqa: F401
@@ -26,7 +25,6 @@ import chives.tools.schedule as sched_tools
 
 
 async def main() -> None:
-    clear_registry()
     config = Config()
     store = Store(config.state_path)
     memory_tools.init(store)
