@@ -56,8 +56,8 @@ def _register() -> None:
             ids = data[0].split()[-n:]
             results = []
             for uid in ids:
-                _, msg_data = conn.fetch(uid, "(RFC822)")
-                raw = msg_data[1] if isinstance(msg_data[1], bytes) else msg_data[0][1]
+                _, msg_data = conn.fetch(uid, "(BODY.PEEK[])")
+                raw = msg_data[0][1]
                 results.append(_parse_message(raw))
         return json.dumps(results)
 
@@ -69,25 +69,12 @@ def _register() -> None:
             ids = data[0].split()[-10:]
             results = []
             for uid in ids:
-                _, msg_data = conn.fetch(uid, "(RFC822)")
-                raw = msg_data[1] if isinstance(msg_data[1], bytes) else msg_data[0][1]
+                _, msg_data = conn.fetch(uid, "(BODY.PEEK[])")
+                raw = msg_data[0][1]
                 results.append(_parse_message(raw))
         return json.dumps(results)
-
-    @tool
-    def archive_email(message_id: str) -> str:
-        """Archive an email by its Message-ID header value."""
-        with _connection() as conn:
-            _, data = conn.search(None, f'HEADER Message-ID "{message_id}"')
-            ids = data[0].split()
-            if not ids:
-                return f"No email found with ID: {message_id}"
-            conn.store(ids[0], "+FLAGS", "\\Deleted")
-            conn.expunge()
-        return f"Archived email: {message_id}"
 
     globals().update({
         "fetch_unread_emails": fetch_unread_emails,
         "search_emails": search_emails,
-        "archive_email": archive_email,
     })

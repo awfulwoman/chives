@@ -1,9 +1,12 @@
 from __future__ import annotations
+import logging
 import openai
 from chives.config import Config
 from chives.context import build_context
 from chives.store import Store
 from chives.tools.registry import get_tools_schema, dispatch_tool
+
+log = logging.getLogger(__name__)
 
 
 class Agent:
@@ -32,6 +35,7 @@ class Agent:
 
             response = await self.client.chat.completions.create(**kwargs)
             choice = response.choices[0]
+            log.debug("LLM finish_reason=%s tool_calls=%s", choice.finish_reason, choice.message.tool_calls)
 
             if choice.finish_reason == "tool_calls" and choice.message.tool_calls:
                 messages.append(choice.message)
