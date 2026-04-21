@@ -47,5 +47,23 @@ cat > "$PLIST_PATH" <<PLIST
 PLIST
 
 mkdir -p "${REPO_DIR}/logs"
+
+# Grant Calendar access in TCC for both org.python.python (the accessing process)
+# and uv (the responsible process tccd evaluates for launchd agents).
+# auth_reason=3 (User Set) is required — reason=1 (Error) causes tccd to re-evaluate.
+# Must use the real path to uv (not a symlink) as TCC matches on the versioned Cellar path.
+UV_REAL="$(python3 -c "import os; print(os.path.realpath('$UV_PATH'))")"
+TCC_DB="$HOME/Library/Application Support/com.apple.TCC/TCC.db"
+sqlite3 "$TCC_DB" "
+INSERT OR REPLACE INTO access
+  (service, client, client_type, auth_value, auth_reason, auth_version, csreq, indirect_object_identifier)
+VALUES
+  ('kTCCServiceCalendar', 'org.python.python', 0, 2, 3, 1, NULL, 'UNUSED');
+INSERT OR REPLACE INTO access
+  (service, client, client_type, auth_value, auth_reason, auth_version, csreq, indirect_object_identifier)
+VALUES
+  ('kTCCServiceCalendar', '$UV_REAL', 1, 2, 3, 1, NULL, 'UNUSED');
+" && echo "Calendar TCC permissions granted."
+
 launchctl bootstrap gui/$(id -u) "$PLIST_PATH" || true
 echo "Chives service installed and started."
