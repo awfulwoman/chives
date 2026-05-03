@@ -22,7 +22,7 @@ class Agent:
     async def run(self, user_message: str, connector: str, thread_id: str) -> str:
         self.store.add_turn(connector, thread_id, "user", user_message)
 
-        system = build_context(self.config, self.store, user_message)
+        system = build_context(self.config, self.store, user_message, connector)
         history = self.store.get_turns(connector, thread_id)
         messages = [{"role": "system", "content": system}, *history]
 
