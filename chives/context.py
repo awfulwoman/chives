@@ -1,4 +1,5 @@
 from __future__ import annotations
+from datetime import datetime
 from pathlib import Path
 from chives.config import Config
 from chives.store import Store
@@ -7,8 +8,11 @@ from chives.store import Store
 def build_context(config: Config, store: Store, current_message: str = "", connector: str = "") -> str:
     parts: list[str] = []
 
+    now = datetime.now().astimezone()
+    meta_lines = [f"Current date and time: {now.strftime('%Y-%m-%d %H:%M:%S %Z')}"]
     if connector:
-        parts.append(f"You are communicating with the user via: {connector}")
+        meta_lines.append(f"Connector: {connector}")
+    parts.append("\n".join(meta_lines))
 
     profile = Path(config.profile_path)
     for fname in ("PERSONALITY.md", "USER.md", "PROTOCOLS.md"):
