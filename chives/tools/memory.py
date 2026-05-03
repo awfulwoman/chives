@@ -22,16 +22,31 @@ def _register() -> None:
 
     @tool
     def recall_facts(query: str) -> str:
-        """Recall stored facts relevant to a query."""
+        """Recall stored facts relevant to a query. Returns id and fact for each result."""
         assert _store is not None
         memories = _store.get_all_memories()
         if not memories:
             return "No facts stored yet."
-        hits = [m["fact"] for m in memories if query.lower() in m["fact"].lower()]
+        hits = [m for m in memories if query.lower() in m["fact"].lower()]
         if not hits:
-            # Return most recent 10 facts when no substring match
-            hits = [m["fact"] for m in memories[-10:]]
-        return "\n".join(f"- {h}" for h in hits)
+            hits = memories[-10:]
+        return "\n".join(f"[{m['id']}] {m['fact']}" for m in hits)
+
+    @tool
+    def update_fact(memory_id: str, new_fact: str) -> str:
+        """Update a stored fact by its id (from recall_facts)."""
+        assert _store is not None
+        ok = _store.update_memory(int(memory_id), new_fact)
+        return f"Updated fact {memory_id}." if ok else f"No fact found with id {memory_id}."
+
+    @tool
+    def delete_fact(memory_id: str) -> str:
+        """Delete a stored fact by its id (from recall_facts)."""
+        assert _store is not None
+        ok = _store.delete_memory(int(memory_id))
+        return f"Deleted fact {memory_id}." if ok else f"No fact found with id {memory_id}."
 
     globals()["store_fact"] = store_fact
     globals()["recall_facts"] = recall_facts
+    globals()["update_fact"] = update_fact
+    globals()["delete_fact"] = delete_fact

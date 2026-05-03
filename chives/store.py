@@ -81,6 +81,18 @@ class Store:
             ).fetchall()
         return [{"id": r["id"], "fact": r["fact"], "embedding": r["embedding"]} for r in rows]
 
+    def update_memory(self, memory_id: int, fact: str) -> bool:
+        with self._conn() as conn:
+            cur = conn.execute(
+                "UPDATE memory SET fact=? WHERE id=?", (fact, memory_id)
+            )
+            return cur.rowcount > 0
+
+    def delete_memory(self, memory_id: int) -> bool:
+        with self._conn() as conn:
+            cur = conn.execute("DELETE FROM memory WHERE id=?", (memory_id,))
+            return cur.rowcount > 0
+
     # --- Nudges ---
 
     def add_nudge(
