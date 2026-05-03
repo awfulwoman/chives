@@ -43,6 +43,7 @@ def list_calendar_events(period: str) -> str:
     """List calendar events. period must be 'today' or 'week'."""
     import EventKit
     store = _get_store()
+    store.refreshSourcesIfNecessary()
 
     now = datetime.now(timezone.utc)
     if period == "today":
