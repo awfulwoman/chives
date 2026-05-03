@@ -34,6 +34,7 @@ def list_reminders(include_completed: str) -> str:
     import EventKit
 
     store = _get_store()
+    store.refreshSourcesIfNecessary()
     done = threading.Event()
     found: list = []
 
@@ -94,6 +95,7 @@ def complete_reminder(title: str) -> str:
     import EventKit
 
     store = _get_store()
+    store.refreshSourcesIfNecessary()
     done = threading.Event()
     found: list = []
 
