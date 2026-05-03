@@ -74,7 +74,28 @@ def _register() -> None:
                 results.append(_parse_message(raw))
         return json.dumps(results)
 
+    @tool
+    def fetch_email_body(message_id: str) -> str:
+        """Fetch the full body of an email by its Message-ID header value."""
+        with _connection() as conn:
+            _, data = conn.search(None, f'HEADER Message-ID "{message_id}"')
+            ids = data[0].split()
+            if not ids:
+                return json.dumps({"error": f"No email found with ID: {message_id}"})
+            _, msg_data = conn.fetch(ids[0], "(BODY.PEEK[])")
+            msg = email.message_from_bytes(msg_data[0][1])
+            body = ""
+            if msg.is_multipart():
+                for part in msg.walk():
+                    if part.get_content_type() == "text/plain":
+                        body = part.get_payload(decode=True).decode(errors="replace")
+                        break
+            else:
+                body = msg.get_payload(decode=True).decode(errors="replace")
+            return json.dumps({"message_id": message_id, "body": body})
+
     globals().update({
         "fetch_unread_emails": fetch_unread_emails,
         "search_emails": search_emails,
+        "fetch_email_body": fetch_email_body,
     })
