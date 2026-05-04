@@ -28,7 +28,7 @@ async def main() -> None:
 
     # Inject dependencies into tools that need them
     memory_tools.init(store)
-    email_tools.init(config.imap)
+    email_tools.init(config.imap, store)
 
     agent = Agent(config, store)
     bus = Bus()

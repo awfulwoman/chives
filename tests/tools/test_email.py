@@ -17,6 +17,11 @@ def imap_config():
     return IMAPConfig(host="imap.example.com", port=993, username="user", password="pass")
 
 
+@pytest.fixture
+def mock_store():
+    return MagicMock()
+
+
 def _make_fetch_response():
     """Simulates imaplib fetch response for a simple text email."""
     raw = (
@@ -27,10 +32,10 @@ def _make_fetch_response():
         b"\r\n"
         b"Hello world"
     )
-    return [b"1 (RFC822 {%d}" % len(raw), raw]
+    return [(b"1 (RFC822 {%d}" % len(raw), raw)]
 
 
-def test_fetch_unread_emails(imap_config):
+def test_fetch_unread_emails(imap_config, mock_store):
     mock_conn = MagicMock()
     mock_conn.search.return_value = ("OK", [b"1 2"])
     mock_conn.fetch.return_value = ("OK", _make_fetch_response())
@@ -41,13 +46,14 @@ def test_fetch_unread_emails(imap_config):
         import sys
         sys.modules.pop("chives.tools.email", None)
         import chives.tools.email as email_tools
-        email_tools.init(imap_config)
+        email_tools.init(imap_config, mock_store)
         result = email_tools.fetch_unread_emails(max_count="5")
         data = json.loads(result)
         assert isinstance(data, list)
+        mock_store.mark_email_seen.assert_called_with("<msg001@example.com>")
 
 
-def test_search_emails(imap_config):
+def test_search_emails(imap_config, mock_store):
     mock_conn = MagicMock()
     mock_conn.search.return_value = ("OK", [b"1"])
     mock_conn.fetch.return_value = ("OK", _make_fetch_response())
@@ -58,7 +64,7 @@ def test_search_emails(imap_config):
         import sys
         sys.modules.pop("chives.tools.email", None)
         import chives.tools.email as email_tools
-        email_tools.init(imap_config)
+        email_tools.init(imap_config, mock_store)
         result = email_tools.search_emails(query="test")
         data = json.loads(result)
         assert isinstance(data, list)

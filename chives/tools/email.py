@@ -4,14 +4,17 @@ import imaplib
 import json
 from contextlib import contextmanager
 from chives.config import IMAPConfig
+from chives.store import Store
 from chives.tools.registry import tool
 
 _imap_config: IMAPConfig | None = None
+_store: Store | None = None
 
 
-def init(imap_config: IMAPConfig) -> None:
-    global _imap_config
+def init(imap_config: IMAPConfig, store: Store) -> None:
+    global _imap_config, _store
     _imap_config = imap_config
+    _store = store
     _register()
 
 
@@ -58,7 +61,10 @@ def _register() -> None:
             for uid in ids:
                 _, msg_data = conn.fetch(uid, "(BODY.PEEK[])")
                 raw = msg_data[0][1]
-                results.append(_parse_message(raw))
+                parsed = _parse_message(raw)
+                results.append(parsed)
+                if _store and parsed.get("message_id"):
+                    _store.mark_email_seen(parsed["message_id"])
         return json.dumps(results)
 
     @tool
