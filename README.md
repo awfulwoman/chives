@@ -18,7 +18,7 @@ A local-first ADHD executive assistant agent for macOS. Send it messages via Tel
 flowchart TD
     Telegram([Telegram]) & OpenWebUI([Open WebUI]) --> Bus
 
-    Bus["Message Bus\nbas.py · asyncio queue"]
+    Bus["Message Bus\nbus.py · asyncio queue"]
     Bus --> Pipeline
 
     Pipeline["Pipeline Middleware\npipeline.py · rate limit · slash commands"]
