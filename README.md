@@ -1,6 +1,6 @@
 # chives
 
-A local-first ADHD executive assistant agent for macOS. Send it messages via Telegram or Open WebUI; it uses a local Ollama LLM with tool-calling to manage your calendar, reminders, contacts, and email — without any data leaving your machine.
+A local-first executive assistant agent for macOS. It uses a local Ollama LLM with tool-calling to manage MacOS-native calendars, reminders, contacts, and email.
 
 ## What it does
 
