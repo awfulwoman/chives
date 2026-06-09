@@ -9,8 +9,6 @@ dependencies = [
     "uvicorn[standard]>=0.20",
     "pydantic-settings>=2.0",
     "apscheduler>=3.10,<4",
-    "pyobjc-framework-EventKit>=10",
-    "pyobjc-framework-Contacts>=10",
     "sqlite-vec>=0.1",
     "httpx>=0.25",
 ]

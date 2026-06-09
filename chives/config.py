@@ -13,24 +13,18 @@ class TelegramConfig(BaseModel):
     allowed_chat_ids: list[int] = []
 
 
-class IMAPConfig(BaseModel):
-    host: str = ""
-    port: int = 993
-    username: str = ""
-    password: str = ""
-
-
 class Config(BaseSettings):
     model_config = SettingsConfigDict(
         env_prefix="CHIVES_",
         env_nested_delimiter="__",
         env_file=".env",
         env_file_encoding="utf-8",
+        extra="ignore",
     )
 
     llm: LLMConfig = LLMConfig()
     telegram: TelegramConfig = TelegramConfig()
-    imap: IMAPConfig = IMAPConfig()
+    gateway_url: str = "http://127.0.0.1:4000/mcp"
     morning_brief_time: str = "08:00"
     event_reminder_minutes: int = 15
     idle_checkin_hours: int = 0

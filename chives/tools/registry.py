@@ -70,6 +70,12 @@ async def dispatch_tool(name: str, arguments: str) -> str:
         return json.dumps({"error": str(exc)})
 
 
+def register_raw(name: str, schema: dict, fn: Callable) -> None:
+    """Register a tool with a pre-built schema. For dynamic tool registration."""
+    _registry[name] = fn
+    _schemas.append(schema)
+
+
 def clear_registry() -> None:
     """Clear all registered tools. Used in tests."""
     _registry.clear()

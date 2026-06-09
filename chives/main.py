@@ -12,12 +12,8 @@ from chives.scheduler import Scheduler
 from chives.connectors.telegram import TelegramConnector
 from chives.connectors.openwebui import create_app
 
-# Tool modules — imported to register @tool functions
-import chives.tools.calendar  # noqa: F401
-import chives.tools.reminders  # noqa: F401
-import chives.tools.contacts  # noqa: F401
 import chives.tools.memory as memory_tools
-import chives.tools.email as email_tools
+import chives.tools.gateway as gateway_tools
 import chives.tools.schedule as sched_tools
 
 
@@ -26,9 +22,8 @@ async def main() -> None:
 
     store = Store(config.state_path)
 
-    # Inject dependencies into tools that need them
     memory_tools.init(store)
-    email_tools.init(config.imap, store)
+    await gateway_tools.init(config.gateway_url)
 
     agent = Agent(config, store)
     bus = Bus()
