@@ -1,9 +1,17 @@
 from __future__ import annotations
+import json
 import httpx
 from chives.tools.registry import register_raw
 
 _GATEWAY_URL = "http://127.0.0.1:4000/mcp"
 _HEADERS = {"Content-Type": "application/json", "Accept": "application/json, text/event-stream"}
+
+
+def _parse_sse(resp: httpx.Response) -> dict:
+    for line in resp.text.splitlines():
+        if line.startswith("data: "):
+            return json.loads(line[6:])
+    raise ValueError(f"No data line in SSE response: {resp.text!r}")
 
 
 def _make_caller(tool_name: str):
@@ -16,7 +24,7 @@ def _make_caller(tool_name: str):
                 headers=_HEADERS,
             )
             resp.raise_for_status()
-            data = resp.json()
+            data = _parse_sse(resp)
             if "error" in data:
                 return data["error"].get("message", str(data["error"]))
             content = data["result"]["content"]
@@ -34,7 +42,7 @@ async def init(gateway_url: str = _GATEWAY_URL) -> None:
             headers=_HEADERS,
         )
         resp.raise_for_status()
-        tools = resp.json()["result"]["tools"]
+        tools = _parse_sse(resp)["result"]["tools"]
 
     for tool_def in tools:
         name = tool_def["name"]
