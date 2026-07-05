@@ -1,14 +1,30 @@
 import json
 import pytest
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 from fastapi.testclient import TestClient
 
 
-async def test_list_models():
+def _make_app(agent=None):
     from chives.connectors.openwebui import create_app
+    from chives.config import Config, LLMConfig
 
-    mock_agent = AsyncMock()
-    app = create_app(mock_agent)
+    store = MagicMock()
+    store.stats.return_value = {
+        "turn_total": 0,
+        "turns_by_connector": {},
+        "memory_count": 0,
+        "pending_nudges": 0,
+        "email_seen_count": 0,
+        "last_turn": None,
+    }
+    config = MagicMock(spec=Config)
+    config.llm = LLMConfig()
+    config.morning_brief_time = "08:00"
+    return create_app(agent or AsyncMock(), store, config)
+
+
+async def test_list_models():
+    app = _make_app()
     client = TestClient(app)
     resp = client.get("/v1/models")
     assert resp.status_code == 200
@@ -19,10 +35,8 @@ async def test_list_models():
 
 
 async def test_chat_completions_non_streaming():
-    from chives.connectors.openwebui import create_app
-
     mock_agent = AsyncMock(return_value="Here is your answer.")
-    app = create_app(mock_agent)
+    app = _make_app(mock_agent)
     client = TestClient(app)
 
     payload = {
@@ -37,9 +51,7 @@ async def test_chat_completions_non_streaming():
 
 
 async def test_ollama_list_models():
-    from chives.connectors.openwebui import create_app
-
-    app = create_app(AsyncMock())
+    app = _make_app()
     client = TestClient(app)
     resp = client.get("/api/tags")
     assert resp.status_code == 200
@@ -49,9 +61,7 @@ async def test_ollama_list_models():
 
 
 async def test_ollama_chat_non_streaming():
-    from chives.connectors.openwebui import create_app
-
-    app = create_app(AsyncMock(return_value="All lights off."))
+    app = _make_app(AsyncMock(return_value="All lights off."))
     client = TestClient(app)
     payload = {
         "model": "chives:latest",
@@ -67,9 +77,7 @@ async def test_ollama_chat_non_streaming():
 
 
 async def test_ollama_chat_streaming():
-    from chives.connectors.openwebui import create_app
-
-    app = create_app(AsyncMock(return_value="Done."))
+    app = _make_app(AsyncMock(return_value="Done."))
     client = TestClient(app)
     payload = {
         "model": "chives:latest",
@@ -89,9 +97,7 @@ async def test_ollama_chat_streaming():
 
 
 async def test_ollama_pull():
-    from chives.connectors.openwebui import create_app
-
-    app = create_app(AsyncMock())
+    app = _make_app()
     client = TestClient(app)
     resp = client.post("/api/pull", json={"model": "chives:latest", "stream": False})
     assert resp.status_code == 200

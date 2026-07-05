@@ -137,3 +137,31 @@ class Store:
                 "SELECT 1 FROM email_seen WHERE message_id=?", (message_id,)
             ).fetchone()
         return row is not None
+
+    # --- Stats ---
+
+    def stats(self) -> dict:
+        with self._conn() as conn:
+            turn_total = conn.execute("SELECT COUNT(*) FROM turns").fetchone()[0]
+            turns_by_connector = {
+                row[0]: row[1]
+                for row in conn.execute(
+                    "SELECT connector, COUNT(*) FROM turns GROUP BY connector"
+                ).fetchall()
+            }
+            memory_count = conn.execute("SELECT COUNT(*) FROM memory").fetchone()[0]
+            pending_nudges = conn.execute(
+                "SELECT COUNT(*) FROM nudges WHERE fired=0"
+            ).fetchone()[0]
+            email_seen_count = conn.execute("SELECT COUNT(*) FROM email_seen").fetchone()[0]
+            last_turn = conn.execute(
+                "SELECT role, content, connector, created_at FROM turns ORDER BY created_at DESC LIMIT 1"
+            ).fetchone()
+        return {
+            "turn_total": turn_total,
+            "turns_by_connector": turns_by_connector,
+            "memory_count": memory_count,
+            "pending_nudges": pending_nudges,
+            "email_seen_count": email_seen_count,
+            "last_turn": dict(last_turn) if last_turn else None,
+        }

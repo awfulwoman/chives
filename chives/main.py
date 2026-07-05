@@ -52,7 +52,7 @@ async def main() -> None:
     scheduler = Scheduler(config, agent.run, store, telegram)
     scheduler.start()
 
-    openwebui_app = create_app(agent.run)
+    openwebui_app = create_app(agent.run, store, config)
     server = uvicorn.Server(
         uvicorn.Config(openwebui_app, host="0.0.0.0", port=8080, log_level="warning")
     )
