@@ -8,18 +8,46 @@ log = logging.getLogger(__name__)
 
 _HEADERS = {"Content-Type": "application/json", "Accept": "application/json, text/event-stream"}
 
+# url -> mcp-session-id, populated during _register_from
+_sessions: dict[str, str] = {}
 
-def _parse_sse(resp: httpx.Response) -> dict:
-    for line in resp.text.splitlines():
-        if line.startswith("data: "):
-            return json.loads(line[6:])
-    raise ValueError(f"No data line in SSE response: {resp.text!r}")
+
+def _parse_response(resp: httpx.Response) -> dict:
+    if "text/event-stream" in resp.headers.get("content-type", ""):
+        for line in resp.text.splitlines():
+            if line.startswith("data: "):
+                return json.loads(line[6:])
+        raise ValueError(f"No data line in SSE response: {resp.text!r}")
+    return resp.json()
+
+
+async def _init_session(client: httpx.AsyncClient, url: str, headers: dict) -> str | None:
+    resp = await client.post(
+        url,
+        json={"jsonrpc": "2.0", "id": 0, "method": "initialize", "params": {
+            "protocolVersion": "2024-11-05",
+            "capabilities": {},
+            "clientInfo": {"name": "chives", "version": "1.0"},
+        }},
+        headers=headers,
+    )
+    resp.raise_for_status()
+    session_id = resp.headers.get("mcp-session-id")
+    notif_headers = {**headers, **({"Mcp-Session-Id": session_id} if session_id else {})}
+    await client.post(
+        url,
+        json={"jsonrpc": "2.0", "method": "notifications/initialized"},
+        headers=notif_headers,
+    )
+    return session_id
 
 
 def _make_caller(tool_name: str, url: str, auth_key: str | None = None):
-    headers = {**_HEADERS, **({"Authorization": f"Bearer {auth_key}"} if auth_key else {})}
+    base_headers = {**_HEADERS, **({"Authorization": f"Bearer {auth_key}"} if auth_key else {})}
 
     async def caller(**kwargs) -> str:
+        session_id = _sessions.get(url)
+        headers = {**base_headers, **({"Mcp-Session-Id": session_id} if session_id else {})}
         async with httpx.AsyncClient(timeout=30) as client:
             resp = await client.post(
                 url,
@@ -28,7 +56,7 @@ def _make_caller(tool_name: str, url: str, auth_key: str | None = None):
                 headers=headers,
             )
             resp.raise_for_status()
-            data = _parse_sse(resp)
+            data = _parse_response(resp)
             if "error" in data:
                 return data["error"].get("message", str(data["error"]))
             content = data["result"]["content"]
@@ -38,15 +66,20 @@ def _make_caller(tool_name: str, url: str, auth_key: str | None = None):
 
 
 async def _register_from(url: str, auth_key: str | None = None) -> None:
-    headers = {**_HEADERS, **({"Authorization": f"Bearer {auth_key}"} if auth_key else {})}
+    base_headers = {**_HEADERS, **({"Authorization": f"Bearer {auth_key}"} if auth_key else {})}
     async with httpx.AsyncClient(timeout=10) as client:
+        session_id = await _init_session(client, url, base_headers)
+        if session_id:
+            _sessions[url] = session_id
+
+        headers = {**base_headers, **({"Mcp-Session-Id": session_id} if session_id else {})}
         resp = await client.post(
             url,
             json={"jsonrpc": "2.0", "id": 1, "method": "tools/list", "params": {}},
             headers=headers,
         )
         resp.raise_for_status()
-        tools = _parse_sse(resp)["result"]["tools"]
+        tools = _parse_response(resp)["result"]["tools"]
 
     for tool_def in tools:
         name = tool_def["name"]
