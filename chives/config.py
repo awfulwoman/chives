@@ -24,7 +24,7 @@ class Config(BaseSettings):
 
     llm: LLMConfig = LLMConfig()
     telegram: TelegramConfig = TelegramConfig()
-    gateway_url: str = "http://127.0.0.1:4000/mcp"
+    mcp_config_path: str = ""
     morning_brief_time: str = "08:00"
     event_reminder_minutes: int = 15
     idle_checkin_hours: int = 0

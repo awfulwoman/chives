@@ -1,7 +1,9 @@
 from __future__ import annotations
 import asyncio
 import logging
+import tomllib
 import uvicorn
+from pathlib import Path
 
 from chives.config import Config
 from chives.store import Store
@@ -23,7 +25,17 @@ async def main() -> None:
     store = Store(config.state_path)
 
     memory_tools.init(store)
-    await gateway_tools.init(config.gateway_url)
+
+    mcp_urls: list[str] = []
+    if config.mcp_config_path:
+        p = Path(config.mcp_config_path)
+        if p.exists():
+            with p.open("rb") as f:
+                mcp_config = tomllib.load(f)
+            mcp_urls = [s["url"] for s in mcp_config.get("servers", [])]
+        else:
+            logging.getLogger(__name__).warning("MCP config not found: %s", config.mcp_config_path)
+    await gateway_tools.init(mcp_urls)
 
     agent = Agent(config, store)
     bus = Bus()

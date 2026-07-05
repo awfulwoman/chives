@@ -1,0 +1,16 @@
+# MCP server configuration for Chives.
+# Each [[servers]] entry is one MCP-over-HTTP endpoint.
+#
+# Usage:
+#   1. Copy this file to mcps.toml and fill in your server URLs.
+#   2. Set CHIVES_MCP_CONFIG_PATH=/app/mcps.toml in your environment.
+#   3. Mount the file into the container (see compose.yml).
+#
+# Tools are discovered at startup via tools/list and registered automatically.
+# If a server is unreachable at startup, it is skipped with a warning.
+
+[[servers]]
+url = "http://host.docker.internal:4000/mcp"
+
+# [[servers]]
+# url = "http://another-mcp-server/mcp"
