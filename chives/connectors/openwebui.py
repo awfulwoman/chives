@@ -1,4 +1,5 @@
 from __future__ import annotations
+import hashlib
 import json
 import time
 import uuid
@@ -12,6 +13,13 @@ from chives.store import Store
 
 _MODEL_NAME = "chives:latest"
 _MODEL_DIGEST = "sha256:" + "0" * 64
+
+
+def _thread_id(messages: list[ChatMessage], prefix: str = "openwebui") -> str:
+    """Derive a stable thread ID from the first message so each conversation is isolated."""
+    first = next((m.content for m in messages if m.role == "user"), "")
+    digest = hashlib.sha1(first.encode()).hexdigest()[:12]
+    return f"{prefix}-{digest}"
 
 
 def _now_iso() -> str:
@@ -148,7 +156,7 @@ def create_app(agent_run: Callable[[str, str, str], Awaitable[str]], store: Stor
         user_msg = next(
             (m.content for m in reversed(req.messages) if m.role == "user"), ""
         )
-        thread_id = "openwebui"
+        thread_id = _thread_id(req.messages)
         completion_id = f"chatcmpl-{uuid.uuid4().hex[:8]}"
 
         if req.stream:
