@@ -1,0 +1,34 @@
+services:
+  chives:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./state:/app/state
+      - ./profile:/app/profile
+    environment:
+      CHIVES_LLM__BASE_URL: http://ollama:11434/v1
+      CHIVES_LLM__MODEL: llama3.2
+      CHIVES_LLM__API_KEY: ollama
+      CHIVES_GATEWAY_URL: http://host.docker.internal:4000/mcp
+      CHIVES_MORNING_BRIEF_TIME: "08:00"
+      CHIVES_EVENT_REMINDER_MINUTES: "15"
+      CHIVES_IDLE_CHECKIN_HOURS: "0"
+      # CHIVES_TELEGRAM__BOT_TOKEN: ...
+      # CHIVES_TELEGRAM__ALLOWED_CHAT_IDS: "[123456789]"
+    restart: unless-stopped
+
+  # Second instance example — uncomment and customise:
+  # chives-alt:
+  #   build: .
+  #   ports:
+  #     - "8081:8080"
+  #   volumes:
+  #     - ./state-alt:/app/state
+  #     - ./profile-alt:/app/profile
+  #   environment:
+  #     CHIVES_LLM__BASE_URL: http://ollama-alt:11434/v1
+  #     CHIVES_LLM__MODEL: qwen3:1.7b
+  #     CHIVES_GATEWAY_URL: http://host.docker.internal:4000/mcp
+  #     # CHIVES_TELEGRAM__BOT_TOKEN: ...  # different bot token
+  #   restart: unless-stopped
