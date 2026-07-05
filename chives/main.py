@@ -32,7 +32,7 @@ async def main() -> None:
         if p.exists():
             with p.open() as f:
                 mcp_config = yaml.safe_load(f)
-            mcp_urls = [s["url"] for s in mcp_config.get("servers", [])]
+            mcp_urls = [s["url"] for s in mcp_config.get("mcp_servers", [])]
         else:
             logging.getLogger(__name__).warning("MCP config not found: %s", config.mcp_config_path)
     await gateway_tools.init(mcp_urls)

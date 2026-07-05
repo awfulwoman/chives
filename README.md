@@ -72,7 +72,7 @@ The status page is available at `http://localhost:8080`.
 Tools are loaded at startup from MCP-over-HTTP servers listed in `mcps.yaml`:
 
 ```yaml
-servers:
+mcp_servers:
   - url: http://your-gateway-host/mcp
   - url: http://another-mcp-server/mcp
 ```

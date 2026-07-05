@@ -9,6 +9,6 @@
 # Tools are discovered at startup via tools/list and registered automatically.
 # If a server is unreachable at startup it is skipped with a warning.
 
-servers:
+mcp_servers:
   - url: http://host.docker.internal:4000/mcp
   # - url: http://another-mcp-server/mcp
