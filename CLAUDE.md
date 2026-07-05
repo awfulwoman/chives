@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-Chives is a local-first ADHD executive assistant agent running on macOS. It accepts messages via Telegram and Open WebUI, runs an OpenAI-compatible tool-calling loop against a local Ollama LLM, and integrates with Apple Calendar, Reminders, Contacts (via PyObjC), and IMAP email. It runs as a macOS launchd service.
+Chives is a local-first general-purpose agent. It accepts messages via Telegram and Open WebUI, runs an OpenAI-compatible tool-calling loop against a local Ollama LLM, and integrates with external tools via MCP servers. Behaviour and persona are configured via profile files. It runs as a Docker container.
 
 ## Commands
 
@@ -24,9 +24,9 @@ uv run pytest tests/test_agent.py
 # Run a single test
 uv run pytest tests/test_agent.py::test_name
 
-# Install/uninstall as launchd service
-./scripts/install_service.sh
-./scripts/uninstall_service.sh
+# Run via Docker
+docker compose up -d
+docker compose logs -f
 ```
 
 ## Architecture
@@ -76,10 +76,6 @@ CHIVES_STATE_PATH=state
 CHIVES_PROFILE_PATH=profile
 ```
 
-## macOS-Specific Constraints
-
-PyObjC integrations (`tools/calendar.py`, `tools/reminders.py`, `tools/contacts.py`) use EventKit and AddressBook frameworks — they only work on macOS and require the appropriate permissions granted to the Python process. These will fail silently or raise on Linux/Windows.
-
 ## Deployment
 
-Runs as launchd service `com.chives.agent`. Logs go to `logs/chives.log` and `logs/chives.err`. The service uses `uv run python -m chives.main` from the repo root with KeepAlive and RunAtLoad.
+Runs as a Docker container via `compose.yml`. Logs via `docker compose logs -f`.

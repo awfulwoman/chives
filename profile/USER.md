@@ -1,7 +1,3 @@
 # User Profile
 
-The user has ADHD and benefits from:
-
-- Short, structured responses
-- Tasks broken into small numbered steps
-- Gentle follow-ups to tasks — not nagging, just a quiet nudge
+Edit this file to describe the person using this agent — their name, preferences, routines, and any context that helps the agent assist them better.

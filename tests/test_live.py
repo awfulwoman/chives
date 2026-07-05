@@ -115,9 +115,8 @@ def test_chat_response_is_coherent(client):
     assert '{"tags":' not in content, (
         f"LLM is outputting tag JSON instead of conversational text: {content!r}"
     )
-    assert "chives" in content.lower(), (
-        f"Response does not mention the agent name: {content!r}"
-    )
+    # Should be a non-trivial sentence, not a one-word or empty reply.
+    assert len(content.split()) > 5, f"Response suspiciously short: {content!r}"
 
 
 def test_empty_message_does_not_crash(client):

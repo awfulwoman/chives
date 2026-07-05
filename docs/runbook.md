@@ -5,9 +5,8 @@
 The repo lives at `~/Code/awfulwoman/chives`. The service always runs from this directory — there is no separate deploy copy.
 
 ```bash
-uv sync                        # install dependencies
-cp .env.example .env           # then edit with real credentials
-./scripts/install_service.sh   # install as launchd service + grant TCC permissions
+uv sync                  # install dependencies (for local dev only)
+cp mcps.example.yaml mcps.yaml   # then edit with your MCP server URLs
 ```
 
 ---
@@ -15,25 +14,18 @@ cp .env.example .env           # then edit with real credentials
 ## Service Management
 
 ```bash
-# Install / reinstall (also re-grants TCC permissions)
-./scripts/install_service.sh
+# Start
+docker compose up -d
 
-# Uninstall
-./scripts/uninstall_service.sh
+# Stop
+docker compose down
 
 # Restart
-launchctl bootout "gui/$(id -u)" ~/Library/LaunchAgents/com.chives.agent.plist
-launchctl bootstrap "gui/$(id -u)" ~/Library/LaunchAgents/com.chives.agent.plist
-
-# Check status (PID + last exit code)
-launchctl list | grep chives
+docker compose restart chives
 
 # Logs
-tail -f logs/chives.log   # stdout
-tail -f logs/chives.err   # stderr (errors, debug output)
+docker compose logs -f chives
 ```
-
-Exit code `0` in `launchctl list` = healthy. Non-zero = last run crashed.
 
 ---
 
@@ -59,57 +51,11 @@ Remove it when done — it floods the logs.
 
 ---
 
-## macOS Permissions (TCC)
-
-Chives needs Calendar, Reminders, and Contacts access. `install_service.sh` grants these automatically by writing to `~/Library/Application Support/com.apple.TCC/TCC.db`.
-
-**Two entries are required for each service** — one for `org.python.python` (the Python process) and one for the real path to `uv` (the responsible process that macOS evaluates for launchd agents):
-
-| TCC Service             | Grants access to       |
-|-------------------------|------------------------|
-| `kTCCServiceCalendar`   | Apple Calendar         |
-| `kTCCServiceReminders`  | Apple Reminders        |
-| `kTCCServiceAddressBook`| Apple Contacts         |
-
-### Why the dialog never appears
-
-macOS uses a "responsible process" model. When the service runs as a launchd agent, `uv` is the responsible process — not Python. Since `uv` has no `NSCalendarsUsageDescription`, macOS silently refuses to show a permission dialog. The workaround is to write TCC entries directly.
-
-### Why SSH sessions always return `granted: False`
-
-`sshd-keygen-wrapper` becomes the responsible process for any process launched over SSH. macOS auto-denies platform binaries regardless of TCC entries. **Always test EventKit access via Telegram or a GUI terminal, never over SSH.**
-
-### After `brew upgrade uv`
-
-The TCC entry for uv uses the versioned Cellar path (e.g. `/opt/homebrew/Cellar/uv/0.11.7/bin/uv`). After upgrading uv, re-run `install_service.sh` to update the TCC entry.
-
-### Resetting and re-granting manually
-
-```bash
-tccutil reset Calendar
-tccutil reset Reminders
-# Then re-run:
-./scripts/install_service.sh
-```
-
----
-
 ## Common Problems
 
-### "0 unread emails" / empty reminders when data exists
+### "0 unread emails" when data exists
 
-**Cause A — RFC822 fetch marks emails as read.** The original email tool used `(RFC822)` which sets `\Seen` on the server. Fixed: now uses `(BODY.PEEK[])`.
-
-**Cause B — EKEventStore is cached from before iCloud sync completed.** Restart the service after syncing calendars or reminders for the first time on a new machine.
-
-**Cause C — TCC permission denied.** If running from SSH, always returns empty (see above). From the GUI session, check TCC entries:
-
-```bash
-sqlite3 ~/Library/Application\ Support/com.apple.TCC/TCC.db \
-  "SELECT service, client, auth_value FROM access WHERE service LIKE 'kTCCService%';"
-```
-
-`auth_value=2` = allowed, `auth_value=0` = denied.
+**RFC822 fetch marks emails as read.** The original email tool used `(RFC822)` which sets `\Seen` on the server. Fixed: now uses `(BODY.PEEK[])`.
 
 ### Model not calling tools / hallucinating data
 

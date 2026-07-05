@@ -9,7 +9,7 @@ from chives.context import build_context
 def config(tmp_path):
     (tmp_path / "profile").mkdir()
     (tmp_path / "profile" / "PERSONALITY.md").write_text("You are Chives.")
-    (tmp_path / "profile" / "USER.md").write_text("User has ADHD.")
+    (tmp_path / "profile" / "USER.md").write_text("User is a software engineer.")
     (tmp_path / "profile" / "PROTOCOLS.md").write_text("Keep answers short.")
     c = Config()
     c.profile_path = str(tmp_path / "profile")
@@ -29,7 +29,7 @@ def test_includes_personality(config, store):
 
 def test_includes_user_profile(config, store):
     ctx = build_context(config, store, "hello")
-    assert "ADHD" in ctx
+    assert "software engineer" in ctx
 
 
 def test_includes_memories(config, store):
