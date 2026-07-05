@@ -1,16 +1,17 @@
 # chives
 
-A local-first executive assistant agent for macOS. It uses a local Ollama LLM with tool-calling to manage MacOS-native calendars, reminders, contacts, and email.
+A local-first executive assistant agent. Uses a local Ollama LLM with tool-calling to manage calendar, reminders, contacts, and email via a gateway MCP server. Runs as a Docker container.
 
 ## What it does
 
 - Answers questions and takes actions through natural conversation
-- Reads and creates Apple Calendar events and Reminders
-- Looks up contacts via AddressBook
+- Reads and creates calendar events and reminders
+- Looks up contacts
 - Monitors IMAP email
 - Sends proactive nudges and a morning brief on a schedule
 - Remembers facts about you across conversations (SQLite-backed memory)
-- Runs as a persistent macOS launchd service
+- Exposes an OpenAI-compatible API so it works as an Open WebUI backend
+- Serves a live status page at `GET /`
 
 ## Architecture
 
@@ -27,7 +28,7 @@ flowchart TD
     subgraph Agent["Agent — agent.py"]
         LLM["LLM\nOllama via openai SDK"]
         Context["Context — context.py\nPERSONALITY.md · USER.md\nPROTOCOLS.md · memory facts"]
-        Tools["Tool Dispatch — tools/registry.py\ncalendar · reminders · contacts\nemail · memory · schedule"]
+        Tools["Tool Dispatch — tools/registry.py\ngateway MCP proxy · memory · schedule"]
     end
 
     Agent --> Store & Scheduler
@@ -36,43 +37,69 @@ flowchart TD
     Scheduler["Scheduler — scheduler.py\nAPScheduler\nmorning brief · nudges · event reminders"]
 ```
 
-`main.py` wires it all together: `Config` → `Store` → `Agent` → `Bus` → connectors + `Scheduler`, running as three concurrent asyncio tasks (bus loop, Telegram polling, FastAPI server for Open WebUI).
+`main.py` wires it all together: `Config` → `Store` → `Agent` → `Bus` → connectors + `Scheduler`, running as three concurrent asyncio tasks (bus loop, Telegram polling, FastAPI server).
 
-## Requirements
+## Running with Docker
 
-- macOS (PyObjC Calendar/Reminders/Contacts integrations are macOS-only)
-- [Ollama](https://ollama.com) running locally with a tool-capable model (e.g. `llama3.2`)
-- Python 3.11+ via [uv](https://docs.astral.sh/uv/)
-- A Telegram bot token (optional — Open WebUI works without it)
-
-## Setup
+The image is published to GitHub Container Registry on every push to `main`:
 
 ```bash
-# Install dependencies
-uv sync
+docker pull ghcr.io/awfulwoman/chives:latest
+```
 
-# Configure
+### Quick start
+
+```bash
+# 1. Create your MCP server config
+cp mcps.example.yaml mcps.yaml
+# Edit mcps.yaml with your gateway URL
+
+# 2. Create your profile
+mkdir -p state profile
+# Add PERSONALITY.md, USER.md, PROTOCOLS.md to profile/
+
+# 3. Configure and run
 cp .env.example .env
 # Edit .env with your Ollama URL, Telegram token, IMAP credentials, etc.
 
-# Run in development
-uv run python -m chives.main
+docker compose up
 ```
+
+The status page is available at `http://localhost:8080`.
+
+### MCP servers
+
+Tools are loaded at startup from MCP-over-HTTP servers listed in `mcps.yaml`:
+
+```yaml
+servers:
+  - url: http://your-gateway-host/mcp
+  - url: http://another-mcp-server/mcp
+```
+
+Point `CHIVES_MCP_CONFIG_PATH` at this file. Unreachable servers are skipped with a warning — Chives will still start.
 
 ### Configuration
 
-All settings use the `CHIVES_` prefix with `__` for nesting:
+All settings use the `CHIVES_` prefix with `__` for nesting. See `.env.example` for the full list. Key variables:
 
 ```
-CHIVES_LLM__BASE_URL=http://localhost:11434/v1
+CHIVES_LLM__BASE_URL=http://ollama-host:11434/v1
 CHIVES_LLM__MODEL=llama3.2
+CHIVES_MCP_CONFIG_PATH=/app/mcps.yaml
 CHIVES_TELEGRAM__BOT_TOKEN=...
 CHIVES_TELEGRAM__ALLOWED_CHAT_IDS=[123456789]
 CHIVES_IMAP__HOST=imap.example.com
 CHIVES_MORNING_BRIEF_TIME=08:00
-CHIVES_STATE_PATH=state
-CHIVES_PROFILE_PATH=profile
 ```
+
+### Volumes
+
+| Mount | Purpose |
+|---|---|
+| `/app/state` | SQLite database (turns, memory, nudges) |
+| `/app/profile` | Personality/user/protocol markdown files |
+| `/app/mcps.yaml` | MCP server list (read-only) |
 
 ### Personalisation
 
@@ -82,30 +109,17 @@ Edit the files in `profile/` to shape the agent's behaviour:
 - `USER.md` — facts about you: routines, preferences, context
 - `PROTOCOLS.md` — standing instructions (how to handle email, what counts as urgent, etc.)
 
-## Running as a service
-
-```bash
-# Install as launchd service (starts on login, restarts on crash)
-./scripts/install_service.sh
-
-# Uninstall
-./scripts/uninstall_service.sh
-```
-
-Logs: `logs/chives.log` and `logs/chives.err`.
-Service label: `com.chives.agent`.
-
 ## Development
 
 ```bash
-# Run all tests
+# Install dependencies
+uv sync
+
+# Run locally
+uv run python -m chives.main
+
+# Run tests
 uv run pytest tests/
-
-# Run a single test file
-uv run pytest tests/test_agent.py
-
-# Run a single test
-uv run pytest tests/test_agent.py::test_name
 ```
 
 Tools are registered with `@tool` in `tools/registry.py`, which auto-generates OpenAI JSON schema from the function signature and docstring. Tests must call `clear_registry()` between runs (use the `reset` fixture).
