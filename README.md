@@ -74,6 +74,7 @@ Tools are loaded at startup from MCP-over-HTTP servers listed in `mcps.yaml`:
 ```yaml
 mcp_servers:
   - url: http://your-gateway-host/mcp
+    auth_key: your-secret-key       # optional — sent as Bearer token
   - url: http://another-mcp-server/mcp
 ```
 

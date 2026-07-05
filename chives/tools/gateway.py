@@ -16,14 +16,16 @@ def _parse_sse(resp: httpx.Response) -> dict:
     raise ValueError(f"No data line in SSE response: {resp.text!r}")
 
 
-def _make_caller(tool_name: str, url: str):
+def _make_caller(tool_name: str, url: str, auth_key: str | None = None):
+    headers = {**_HEADERS, **({"Authorization": f"Bearer {auth_key}"} if auth_key else {})}
+
     async def caller(**kwargs) -> str:
         async with httpx.AsyncClient(timeout=30) as client:
             resp = await client.post(
                 url,
                 json={"jsonrpc": "2.0", "id": 1, "method": "tools/call",
                       "params": {"name": tool_name, "arguments": kwargs}},
-                headers=_HEADERS,
+                headers=headers,
             )
             resp.raise_for_status()
             data = _parse_sse(resp)
@@ -35,12 +37,13 @@ def _make_caller(tool_name: str, url: str):
     return caller
 
 
-async def _register_from(url: str) -> None:
+async def _register_from(url: str, auth_key: str | None = None) -> None:
+    headers = {**_HEADERS, **({"Authorization": f"Bearer {auth_key}"} if auth_key else {})}
     async with httpx.AsyncClient(timeout=10) as client:
         resp = await client.post(
             url,
             json={"jsonrpc": "2.0", "id": 1, "method": "tools/list", "params": {}},
-            headers=_HEADERS,
+            headers=headers,
         )
         resp.raise_for_status()
         tools = _parse_sse(resp)["result"]["tools"]
@@ -55,14 +58,16 @@ async def _register_from(url: str) -> None:
                 "parameters": tool_def.get("inputSchema", {"type": "object", "properties": {}}),
             },
         }
-        register_raw(name, schema, _make_caller(name, url))
+        register_raw(name, schema, _make_caller(name, url, auth_key))
     log.info("Registered %d tools from %s", len(tools), url)
 
 
-async def init(urls: list[str]) -> None:
-    """Discover tools from each MCP server URL and register them."""
-    for url in urls:
+async def init(servers: list[dict]) -> None:
+    """Discover tools from each MCP server and register them."""
+    for server in servers:
+        url = server["url"]
+        auth_key = server.get("auth_key")
         try:
-            await _register_from(url)
+            await _register_from(url, auth_key)
         except Exception as exc:
             log.warning("Could not reach MCP server %s: %s", url, exc)

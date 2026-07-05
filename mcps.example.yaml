@@ -11,4 +11,6 @@
 
 mcp_servers:
   - url: http://host.docker.internal:4000/mcp
+    # auth_key: your-secret-key
   # - url: http://another-mcp-server/mcp
+  #   auth_key: another-secret-key
