@@ -103,11 +103,33 @@ CHIVES_MORNING_BRIEF_TIME=08:00
 
 ### Personalisation
 
-Edit the files in `profile/` to shape the agent's behaviour:
+The `profile/` directory controls how the agent thinks and behaves. Mount your own copy at `/app/profile` to override the defaults that ship in the image.
 
-- `PERSONALITY.md` — tone, communication style
-- `USER.md` — facts about you: routines, preferences, context
-- `PROTOCOLS.md` — standing instructions (how to handle email, what counts as urgent, etc.)
+| File | Purpose |
+|---|---|
+| `PERSONALITY.md` | Tone and communication style — who the agent is |
+| `USER.md` | Facts about you: routines, preferences, needs, context |
+| `PROTOCOLS.md` | Standing rules — how to handle email, what counts as urgent, when to ask vs. act |
+| `CHECKIN.md` | Templates for scheduled check-ins (morning brief, idle nudges) |
+
+All four files are concatenated into the system prompt on every request alongside recent memory facts. You can omit any file you don't need — missing files are silently skipped.
+
+**Minimal example** — create a `profile/` directory alongside your `compose.yml` and add whichever files you want to customise:
+
+```
+profile/
+  PERSONALITY.md   # "You are Ada, a no-nonsense assistant..."
+  USER.md          # "The user is a software engineer who..."
+  PROTOCOLS.md     # "Never book meetings before 10am..."
+  CHECKIN.md       # "Morning brief should include..."
+```
+
+Then mount it in your compose service:
+
+```yaml
+volumes:
+  - ./profile:/app/profile
+```
 
 ## Development
 
