@@ -11,6 +11,7 @@ dependencies = [
     "apscheduler>=3.10,<4",
     "sqlite-vec>=0.1",
     "httpx>=0.25",
+    "pyyaml>=6.0.3",
 ]
 
 [dependency-groups]

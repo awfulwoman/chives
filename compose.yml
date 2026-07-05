@@ -6,12 +6,12 @@ services:
     volumes:
       - ./state:/app/state
       - ./profile:/app/profile
-      - ./mcps.toml:/app/mcps.toml:ro
+      - ./mcps.yaml:/app/mcps.yaml:ro
     environment:
       CHIVES_LLM__BASE_URL: http://ollama:11434/v1
       CHIVES_LLM__MODEL: llama3.2
       CHIVES_LLM__API_KEY: ollama
-      CHIVES_MCP_CONFIG_PATH: /app/mcps.toml
+      CHIVES_MCP_CONFIG_PATH: /app/mcps.yaml
       CHIVES_MORNING_BRIEF_TIME: "08:00"
       CHIVES_EVENT_REMINDER_MINUTES: "15"
       CHIVES_IDLE_CHECKIN_HOURS: "0"
@@ -27,10 +27,10 @@ services:
   #   volumes:
   #     - ./state-alt:/app/state
   #     - ./profile-alt:/app/profile
-  #     - ./mcps.toml:/app/mcps.toml:ro
+  #     - ./mcps.yaml:/app/mcps.yaml:ro
   #   environment:
   #     CHIVES_LLM__BASE_URL: http://ollama-alt:11434/v1
   #     CHIVES_LLM__MODEL: qwen3:1.7b
-  #     CHIVES_MCP_CONFIG_PATH: /app/mcps.toml
+  #     CHIVES_MCP_CONFIG_PATH: /app/mcps.yaml
   #     # CHIVES_TELEGRAM__BOT_TOKEN: ...  # different bot token
   #   restart: unless-stopped

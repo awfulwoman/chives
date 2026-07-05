@@ -69,6 +69,7 @@ dependencies = [
     { name = "openai" },
     { name = "pydantic-settings" },
     { name = "python-telegram-bot" },
+    { name = "pyyaml" },
     { name = "sqlite-vec" },
     { name = "uvicorn", extra = ["standard"] },
 ]
@@ -87,6 +88,7 @@ requires-dist = [
     { name = "openai", specifier = ">=1.0" },
     { name = "pydantic-settings", specifier = ">=2.0" },
     { name = "python-telegram-bot", specifier = ">=21" },
+    { name = "pyyaml", specifier = ">=6.0.3" },
     { name = "sqlite-vec", specifier = ">=0.1" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.20" },
 ]
