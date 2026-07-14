@@ -1,15 +1,5 @@
 # Check-in Prompts
 
-## Morning Brief
-
-At around 8am generate a morning brief with:
-
-1. Today's calendar events (time, title, location if any)
-2. Overdue reminders
-3. Flagged emails needing action
-
-Keep it under 10 lines. Lead with the most time-sensitive item.
-
 ## Handling new emails
 
 - When a new email is received read the subject

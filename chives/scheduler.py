@@ -2,7 +2,6 @@ from __future__ import annotations
 import json as _json
 from datetime import datetime, timezone, timedelta
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from apscheduler.triggers.cron import CronTrigger
 from chives.config import Config
 from chives.store import Store
 from chives.tools.registry import dispatch_tool
@@ -17,11 +16,6 @@ class Scheduler:
         self._scheduler = AsyncIOScheduler()
 
     def start(self) -> None:
-        hour, minute = self.config.morning_brief_time.split(":")
-        self._scheduler.add_job(
-            self._morning_brief,
-            CronTrigger(hour=int(hour), minute=int(minute)),
-        )
         self._scheduler.add_job(
             self._check_nudges, "interval", minutes=1
         )
@@ -36,16 +30,9 @@ class Scheduler:
             )
         self._scheduler.start()
 
-    async def _morning_brief(self) -> None:
-        prompt = (
-            "Generate the morning brief: today's calendar events, overdue reminders, "
-            "and unread emails needing action. Max 10 lines. Most urgent first."
-        )
-        response = await self.agent(prompt, "scheduler", "morning_brief")
-        for chat_id in self.config.telegram.allowed_chat_ids:
-            await self.telegram.send(chat_id, response)
-
     async def _check_nudges(self) -> None:
+        if self.telegram is None:
+            return
         for nudge in self.store.get_pending_nudges():
             prompt = f"Send a gentle follow-up nudge: {nudge['description']}"
             response = await self.agent(prompt, "scheduler", nudge["thread_id"])

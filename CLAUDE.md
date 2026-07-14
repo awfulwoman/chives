@@ -44,7 +44,7 @@ Message Sources: Telegram + Open WebUI
        └─→ Context: profile/ files + memory facts from SQLite
        ↓
   Store: SQLite (turns, memory, nudges, email_seen in store.py)
-  Scheduler: APScheduler jobs (morning brief, nudges, event reminders in scheduler.py)
+  Scheduler: APScheduler jobs (nudges, event reminders in scheduler.py)
 ```
 
 `main.py` wires everything together: `Config` → `Store` → `Agent` → `Bus` → connectors + `Scheduler`, then runs three concurrent async tasks (bus loop, Telegram polling, FastAPI server).
@@ -68,10 +68,9 @@ Uses pydantic-settings with `CHIVES_` prefix and `__` for nesting. Copy `.env.ex
 ```
 CHIVES_LLM__BASE_URL=http://localhost:11434/v1
 CHIVES_LLM__MODEL=llama3.2
-CHIVES_TELEGRAM__BOT_TOKEN=...
+CHIVES_TELEGRAM__BOT_TOKEN=...  # optional — omit to run without Telegram
 CHIVES_TELEGRAM__ALLOWED_CHAT_IDS=[123456789]
 CHIVES_IMAP__HOST=imap.example.com
-CHIVES_MORNING_BRIEF_TIME=08:00
 CHIVES_STATE_PATH=state
 CHIVES_PROFILE_PATH=profile
 ```

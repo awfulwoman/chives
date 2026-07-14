@@ -39,7 +39,7 @@ async def main() -> None:
 
     agent = Agent(config, store)
     bus = Bus()
-    telegram = TelegramConnector(config, bus)
+    telegram = TelegramConnector(config, bus) if config.telegram.bot_token else None
 
     # Schedule tool needs connector info for routing nudge replies
     default_thread = str(config.telegram.allowed_chat_ids[0]) if config.telegram.allowed_chat_ids else "0"
@@ -71,7 +71,8 @@ async def main() -> None:
 
     async with asyncio.TaskGroup() as tg:
         tg.create_task(bus.run())
-        tg.create_task(telegram.run())
+        if telegram is not None:
+            tg.create_task(telegram.run())
         tg.create_task(server.serve())
 
 

@@ -19,7 +19,6 @@ def _make_app(agent=None):
     }
     config = MagicMock(spec=Config)
     config.llm = LLMConfig()
-    config.morning_brief_time = "08:00"
     return create_app(agent or AsyncMock(), store, config)
 
 

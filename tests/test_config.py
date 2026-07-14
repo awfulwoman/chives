@@ -8,7 +8,6 @@ def test_defaults():
     assert config.llm.model == "llama3.2"
     assert config.llm.api_key == "ollama"
     assert config.imap.port == 993
-    assert config.morning_brief_time == "08:00"
     assert config.event_reminder_minutes == 15
     assert config.idle_checkin_hours == 0
     assert config.state_path == "state"

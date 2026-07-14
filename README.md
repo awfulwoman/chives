@@ -8,7 +8,7 @@ A local-first executive assistant agent. Uses a local Ollama LLM with tool-calli
 - Reads and creates calendar events and reminders
 - Looks up contacts
 - Monitors IMAP email
-- Sends proactive nudges and a morning brief on a schedule
+- Sends proactive nudges and event reminders on a schedule
 - Remembers facts about you across conversations (SQLite-backed memory)
 - Exposes an OpenAI-compatible API so it works as an Open WebUI backend
 - Serves a live status page at `GET /`
@@ -34,7 +34,7 @@ flowchart TD
     Agent --> Store & Scheduler
 
     Store["Store — store.py\nSQLite\nturns · memory · nudges · email_seen"]
-    Scheduler["Scheduler — scheduler.py\nAPScheduler\nmorning brief · nudges · event reminders"]
+    Scheduler["Scheduler — scheduler.py\nAPScheduler\nnudges · event reminders"]
 ```
 
 `main.py` wires it all together: `Config` → `Store` → `Agent` → `Bus` → connectors + `Scheduler`, running as three concurrent asyncio tasks (bus loop, Telegram polling, FastAPI server).
@@ -88,10 +88,9 @@ All settings use the `CHIVES_` prefix with `__` for nesting. See `.env.example` 
 CHIVES_LLM__BASE_URL=http://ollama-host:11434/v1
 CHIVES_LLM__MODEL=llama3.2
 CHIVES_MCP_CONFIG_PATH=/app/mcps.yaml
-CHIVES_TELEGRAM__BOT_TOKEN=...
+CHIVES_TELEGRAM__BOT_TOKEN=...  # optional — omit to run without Telegram
 CHIVES_TELEGRAM__ALLOWED_CHAT_IDS=[123456789]
 CHIVES_IMAP__HOST=imap.example.com
-CHIVES_MORNING_BRIEF_TIME=08:00
 ```
 
 ### Volumes
@@ -111,7 +110,7 @@ The `profile/` directory controls how the agent thinks and behaves. Mount your o
 | `PERSONALITY.md` | Tone and communication style — who the agent is |
 | `USER.md` | Facts about you: routines, preferences, needs, context |
 | `PROTOCOLS.md` | Standing rules — how to handle email, what counts as urgent, when to ask vs. act |
-| `CHECKIN.md` | Templates for scheduled check-ins (morning brief, idle nudges) |
+| `CHECKIN.md` | Templates for scheduled check-ins (idle nudges) |
 
 All four files are concatenated into the system prompt on every request alongside recent memory facts. You can omit any file you don't need — missing files are silently skipped.
 
@@ -122,7 +121,7 @@ profile/
   PERSONALITY.md   # "You are Ada, a no-nonsense assistant..."
   USER.md          # "The user is a software engineer who..."
   PROTOCOLS.md     # "Never book meetings before 10am..."
-  CHECKIN.md       # "Morning brief should include..."
+  CHECKIN.md       # "Nudge me gently, don't nag..."
 ```
 
 Then mount it in your compose service:

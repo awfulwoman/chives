@@ -103,9 +103,8 @@ All settings use the `CHIVES_` prefix with `__` for nesting. See `.env.example` 
 |-----|-------------|
 | `CHIVES_LLM__BASE_URL` | Ollama endpoint, e.g. `http://192.168.1.150:11434/v1` |
 | `CHIVES_LLM__MODEL` | Model name, must support tool calling |
-| `CHIVES_TELEGRAM__BOT_TOKEN` | Token from @BotFather |
+| `CHIVES_TELEGRAM__BOT_TOKEN` | Token from @BotFather (optional — omit to run without Telegram) |
 | `CHIVES_TELEGRAM__ALLOWED_CHAT_IDS` | JSON array of permitted chat IDs |
 | `CHIVES_IMAP__HOST/PORT/USERNAME/PASSWORD` | IMAP credentials |
-| `CHIVES_MORNING_BRIEF_TIME` | `HH:MM` for daily morning brief |
 | `CHIVES_STATE_PATH` | Directory for SQLite db and state (default: `state/`) |
 | `CHIVES_PROFILE_PATH` | Directory for personality/user/protocol markdown (default: `profile/`) |

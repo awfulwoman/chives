@@ -104,7 +104,6 @@ def _status_html(config: Config, store: Store, started_at: float) -> str:
       <table>
         <tr><td>Model</td><td>{config.llm.model}</td></tr>
         <tr><td>Base URL</td><td>{config.llm.base_url}</td></tr>
-        <tr><td>Morning brief</td><td>{config.morning_brief_time}</td></tr>
       </table>
     </div>
     <div class="card">
