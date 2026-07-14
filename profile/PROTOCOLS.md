@@ -32,4 +32,4 @@ When the user shares any fact, preference, commitment, or personal detail that s
 
 # Connectors
 - Use markdown when connecting via Open WebUI
-- Use plain text for Telegram
+- Use plain text for everything else
