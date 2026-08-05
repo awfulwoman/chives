@@ -57,7 +57,9 @@ Message Sources: Telegram + Open WebUI
 
 **Per-thread conversation isolation** — History, nudges, and memory are keyed on `(connector, thread_id)`. Telegram uses `str(chat_id)`; Open WebUI uses `"openwebui"`.
 
-**Context assembly** — `context.py` builds the system prompt by joining `profile/PERSONALITY.md`, `profile/USER.md`, `profile/PROTOCOLS.md`, and recent memory facts (word-matched to the current message).
+**Context assembly** — `context.py` builds the system prompt by joining `profile/PERSONALITY.md`, `profile/USER.md`, `profile/PROTOCOLS.md`, and recent memory facts (word-matched to the current message). Files are read from disk on every request, so edits to the profile files (e.g. via the `/editor` web editor) take effect on the very next message with no restart or cache invalidation needed.
+
+**Profile editor** — `connectors/editor.py` mounts basic-auth-protected `GET/POST /editor` routes on the Open WebUI FastAPI app for editing `profile/*.md` files from a browser. Credentials come from `CHIVES_EDITOR__USERNAME`/`CHIVES_EDITOR__PASSWORD`; leaving either unset disables the editor (all requests 401).
 
 **Async-first** — All I/O is async. Connectors and scheduler run as concurrent asyncio tasks. Tool functions are sync but called via `asyncio.to_thread` where needed.
 
@@ -71,6 +73,8 @@ CHIVES_LLM__MODEL=llama3.2
 CHIVES_TELEGRAM__BOT_TOKEN=...  # optional — omit to run without Telegram
 CHIVES_TELEGRAM__ALLOWED_CHAT_IDS=[123456789]
 CHIVES_IMAP__HOST=imap.example.com
+CHIVES_EDITOR__USERNAME=admin  # optional — omit to disable the /editor web editor
+CHIVES_EDITOR__PASSWORD=change_me
 CHIVES_STATE_PATH=state
 CHIVES_PROFILE_PATH=profile
 ```

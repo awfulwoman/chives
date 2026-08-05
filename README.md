@@ -12,6 +12,7 @@ A local-first executive assistant agent. Uses a local Ollama LLM with tool-calli
 - Remembers facts about you across conversations (SQLite-backed memory)
 - Exposes an OpenAI-compatible API so it works as an Open WebUI backend
 - Serves a live status page at `GET /`
+- Serves a password-protected markdown editor for the profile files at `GET /editor`
 
 ## Architecture
 
@@ -130,6 +131,16 @@ Then mount it in your compose service:
 volumes:
   - ./profile:/app/profile
 ```
+
+#### Editing profile files from the browser
+
+Set `CHIVES_EDITOR__USERNAME` and `CHIVES_EDITOR__PASSWORD` to enable a basic-auth-protected
+markdown editor at `http://localhost:8080/editor`. It lists the `.md` files in `profile/` and lets
+you edit and save them from a browser — no shell access to the container needed. Leaving either
+variable unset disables the editor (every request gets `401`).
+
+Saved changes take effect on the very next message: `context.py` reads the profile files from disk
+on every request, so there is no cache to invalidate or process to restart.
 
 ## Development
 

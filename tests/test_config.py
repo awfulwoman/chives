@@ -7,7 +7,8 @@ def test_defaults():
     assert config.llm.base_url == "http://localhost:11434/v1"
     assert config.llm.model == "llama3.2"
     assert config.llm.api_key == "ollama"
-    assert config.imap.port == 993
+    assert config.editor.username == ""
+    assert config.editor.password == ""
     assert config.event_reminder_minutes == 15
     assert config.idle_checkin_hours == 0
     assert config.state_path == "state"
@@ -20,3 +21,11 @@ def test_env_override(monkeypatch):
     config = Config()
     assert config.llm.base_url == "http://192.168.1.150:11434/v1"
     assert config.llm.model == "mistral"
+
+
+def test_editor_env_override(monkeypatch):
+    monkeypatch.setenv("CHIVES_EDITOR__USERNAME", "admin")
+    monkeypatch.setenv("CHIVES_EDITOR__PASSWORD", "change_me")
+    config = Config()
+    assert config.editor.username == "admin"
+    assert config.editor.password == "change_me"
