@@ -13,6 +13,11 @@ class TelegramConfig(BaseModel):
     allowed_chat_ids: list[int] = []
 
 
+class EditorConfig(BaseModel):
+    username: str = ""
+    password: str = ""
+
+
 class Config(BaseSettings):
     model_config = SettingsConfigDict(
         env_prefix="CHIVES_",
@@ -24,6 +29,7 @@ class Config(BaseSettings):
 
     llm: LLMConfig = LLMConfig()
     telegram: TelegramConfig = TelegramConfig()
+    editor: EditorConfig = EditorConfig()
     mcp_config_path: str = ""
     event_reminder_minutes: int = 15
     idle_checkin_hours: int = 0

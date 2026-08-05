@@ -13,6 +13,7 @@ from chives.pipeline import build_pipeline, rate_limit_middleware, slash_command
 from chives.scheduler import Scheduler
 from chives.connectors.telegram import TelegramConnector
 from chives.connectors.openwebui import create_app
+from chives.connectors.editor import register_editor_routes
 
 import chives.tools.memory as memory_tools
 import chives.tools.gateway as gateway_tools
@@ -65,6 +66,7 @@ async def main() -> None:
     scheduler.start()
 
     openwebui_app = create_app(agent.run, store, config)
+    register_editor_routes(openwebui_app, config)
     server = uvicorn.Server(
         uvicorn.Config(openwebui_app, host="0.0.0.0", port=8080, log_level="warning")
     )
