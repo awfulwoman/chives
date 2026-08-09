@@ -1,7 +1,10 @@
 import inspect
 import json
+import logging
 from functools import wraps
 from typing import Callable, List
+
+log = logging.getLogger(__name__)
 
 _registry: dict[str, Callable] = {}
 _schemas: list[dict] = []
@@ -67,6 +70,7 @@ async def dispatch_tool(name: str, arguments: str) -> str:
             result = await result
         return result if isinstance(result, str) else json.dumps(result)
     except Exception as exc:
+        log.warning("Tool %s failed with args %s: %s", name, arguments, exc, exc_info=True)
         return json.dumps({"error": str(exc)})
 
 
