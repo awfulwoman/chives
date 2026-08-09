@@ -42,11 +42,30 @@ flowchart TD
 
 ## Running with Docker
 
-The image is published to GitHub Container Registry on every push to `main`:
+The image is published to GitHub Container Registry.
+
+Tagged releases (`v1.2.3` git tags) are the stable images — each push a `X.Y.Z`, `X.Y`, `X`, and `latest` tag, and create a matching [GitHub Release](https://github.com/awfulwoman/chives/releases):
 
 ```bash
 docker pull ghcr.io/awfulwoman/chives:latest
+# or pin a specific version:
+docker pull ghcr.io/awfulwoman/chives:1.2.3
 ```
+
+Every push to `main` also publishes a rolling development build, tagged `edge` and with the commit SHA:
+
+```bash
+docker pull ghcr.io/awfulwoman/chives:edge
+```
+
+### Cutting a release
+
+```bash
+git tag v1.2.3
+git push origin v1.2.3
+```
+
+This triggers the build/push/release workflow for that version.
 
 ### Quick start
 
