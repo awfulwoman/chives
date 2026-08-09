@@ -56,11 +56,28 @@ def _list_page(profile_dir: Path) -> str:
     body {{ font-family: system-ui, sans-serif; background: #0f1117; color: #e2e8f0; padding: 2rem; }}
     a {{ color: #38bdf8; }}
     li {{ margin-bottom: 0.5rem; }}
+    form {{ margin-top: 1.5rem; display: flex; gap: 0.5rem; }}
+    input {{ background: #1e2330; color: #e2e8f0; border: 1px solid #334155; border-radius: 6px;
+      padding: 0.5rem; font-family: ui-monospace, monospace; }}
+    button {{ padding: 0.5rem 1.25rem; background: #22c55e; color: #0f1117; border: none;
+      border-radius: 6px; font-weight: 600; cursor: pointer; }}
   </style>
 </head>
 <body>
   <h1>Profile Editor</h1>
   <ul>{items}</ul>
+  <form id="new-file">
+    <input id="new-filename" type="text" placeholder="NEWFILE.md" pattern="[^/\\\\]+\\.md" required>
+    <button type="submit">New file</button>
+  </form>
+  <script>
+    document.getElementById('new-file').addEventListener('submit', (e) => {{
+      e.preventDefault();
+      let name = document.getElementById('new-filename').value.trim();
+      if (!name.endsWith('.md')) name += '.md';
+      window.location.href = '/editor/' + encodeURIComponent(name);
+    }});
+  </script>
 </body>
 </html>"""
 

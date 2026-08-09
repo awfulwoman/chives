@@ -65,6 +65,26 @@ def test_editor_get_nonexistent_file_is_blank(tmp_path):
     assert resp.status_code == 200
 
 
+def test_editor_index_has_new_file_form(tmp_path):
+    app, _ = _make_app(tmp_path)
+    client = TestClient(app)
+    resp = client.get("/editor", auth=("admin", "secret"))
+    assert resp.status_code == 200
+    assert 'id="new-file"' in resp.text
+
+
+def test_editor_save_creates_new_file(tmp_path):
+    app, profile_dir = _make_app(tmp_path)
+    client = TestClient(app)
+    resp = client.post(
+        "/editor/USER.md",
+        json={"content": "The user likes tea."},
+        auth=("admin", "secret"),
+    )
+    assert resp.status_code == 200
+    assert (profile_dir / "USER.md").read_text() == "The user likes tea."
+
+
 def test_editor_save_writes_file(tmp_path):
     app, profile_dir = _make_app(tmp_path)
     client = TestClient(app)
