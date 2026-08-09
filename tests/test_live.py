@@ -27,6 +27,19 @@ RESPONSE_TIMEOUT = 60.0
 TTFT_THRESHOLD = 30.0
 
 
+def _server_reachable() -> bool:
+    try:
+        httpx.get(BASE_URL, timeout=3.0)
+        return True
+    except httpx.HTTPError:
+        return False
+
+
+pytestmark = pytest.mark.skipif(
+    not _server_reachable(), reason=f"{BASE_URL} is unreachable from here"
+)
+
+
 @pytest.fixture(scope="module")
 def client():
     with httpx.Client(base_url=BASE_URL, timeout=RESPONSE_TIMEOUT) as c:
