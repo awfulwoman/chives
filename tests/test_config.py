@@ -9,7 +9,6 @@ def test_defaults():
     assert config.llm.api_key == "ollama"
     assert config.editor.username == ""
     assert config.editor.password == ""
-    assert config.event_reminder_minutes == 15
     assert config.idle_checkin_hours == 0
     assert config.state_path == "state"
     assert config.profile_path == "profile"

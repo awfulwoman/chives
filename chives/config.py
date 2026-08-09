@@ -31,7 +31,6 @@ class Config(BaseSettings):
     telegram: TelegramConfig = TelegramConfig()
     editor: EditorConfig = EditorConfig()
     mcp_config_path: str = ""
-    event_reminder_minutes: int = 15
     idle_checkin_hours: int = 0
     state_path: str = "state"
     profile_path: str = "profile"

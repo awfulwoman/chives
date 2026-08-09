@@ -10,7 +10,6 @@ def config(tmp_path):
     c.state_path = str(tmp_path / "state")
     c.profile_path = str(tmp_path / "profile")
     c.telegram.allowed_chat_ids = [42]
-    c.event_reminder_minutes = 15
     c.idle_checkin_hours = 0
     (tmp_path / "profile").mkdir()
     return c

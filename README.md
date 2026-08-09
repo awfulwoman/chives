@@ -8,7 +8,7 @@ A local-first executive assistant agent. Uses a local Ollama LLM with tool-calli
 - Reads and creates calendar events and reminders
 - Looks up contacts
 - Monitors IMAP email
-- Sends proactive nudges and event reminders on a schedule
+- Sends proactive nudges on a schedule
 - Remembers facts about you across conversations (SQLite-backed memory)
 - Exposes an OpenAI-compatible API so it works as an Open WebUI backend
 - Serves a live status page at `GET /`
@@ -35,7 +35,7 @@ flowchart TD
     Agent --> Store & Scheduler
 
     Store["Store — store.py\nSQLite\nturns · memory · nudges · email_seen"]
-    Scheduler["Scheduler — scheduler.py\nAPScheduler\nnudges · event reminders"]
+    Scheduler["Scheduler — scheduler.py\nAPScheduler\nnudges"]
 ```
 
 `main.py` wires it all together: `Config` → `Store` → `Agent` → `Bus` → connectors + `Scheduler`, running as three concurrent asyncio tasks (bus loop, Telegram polling, FastAPI server).
