@@ -1,0 +1,27 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --all-extras --dev
+
+      # Live tests (-m live) are deselected by default via pyproject addopts —
+      # they need the LAN LLM endpoint, which CI cannot reach.
+      - name: Run tests
+        run: uv run pytest tests/ -q
+
+      - name: Coverage
+        run: uv run --with pytest-cov pytest tests/ --cov=chives --cov-report=term-missing -q

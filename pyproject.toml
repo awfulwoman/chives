@@ -22,6 +22,10 @@ dev = [
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+addopts = "-m 'not live'"
+markers = [
+    "live: hits the live LLM endpoint; deselected by default, run with `-m live`",
+]
 
 [build-system]
 requires = ["hatchling"]

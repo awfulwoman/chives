@@ -48,3 +48,45 @@ def test_email_seen(store):
     # idempotent
     store.mark_email_seen("msg-001")
     assert store.is_email_seen("msg-001")
+
+
+def test_update_memory(store):
+    store.add_memory("original")
+    mem_id = store.get_all_memories()[0]["id"]
+
+    assert store.update_memory(mem_id, "revised") is True
+    assert store.get_all_memories()[0]["fact"] == "revised"
+
+
+def test_update_missing_memory_returns_false(store):
+    assert store.update_memory(9999, "nope") is False
+
+
+def test_delete_memory(store):
+    store.add_memory("temporary")
+    mem_id = store.get_all_memories()[0]["id"]
+
+    assert store.delete_memory(mem_id) is True
+    assert store.get_all_memories() == []
+
+
+def test_delete_missing_memory_returns_false(store):
+    assert store.delete_memory(9999) is False
+
+
+def test_cancel_nudge_removes_it(store):
+    import time
+
+    nid = store.add_nudge("call dentist", time.time() - 1, "telegram", "42")
+    assert store.get_pending_nudges()
+
+    store.cancel_nudge(nid)
+
+    assert store.get_pending_nudges() == []
+
+
+def test_future_nudge_is_not_pending(store):
+    import time
+
+    store.add_nudge("next week", time.time() + 86400, "telegram", "42")
+    assert store.get_pending_nudges() == []

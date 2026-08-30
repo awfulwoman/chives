@@ -7,6 +7,9 @@ def test_defaults():
     assert config.llm.base_url == "http://localhost:11434/v1"
     assert config.llm.model == "llama3.2"
     assert config.llm.api_key == "ollama"
+    assert config.gateway_url == "http://127.0.0.1:4000/mcp"
+    assert config.morning_brief_time == "08:00"
+    assert config.event_reminder_minutes == 15
     assert config.editor.username == ""
     assert config.editor.password == ""
     assert config.idle_checkin_hours == 0
@@ -28,3 +31,11 @@ def test_editor_env_override(monkeypatch):
     config = Config()
     assert config.editor.username == "admin"
     assert config.editor.password == "change_me"
+
+
+def test_gateway_env_override(monkeypatch):
+    monkeypatch.setenv("CHIVES_GATEWAY_URL", "http://192.168.1.100:4000/mcp")
+    monkeypatch.setenv("CHIVES_MORNING_BRIEF_TIME", "07:30")
+    config = Config()
+    assert config.gateway_url == "http://192.168.1.100:4000/mcp"
+    assert config.morning_brief_time == "07:30"
