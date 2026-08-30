@@ -1,9 +1,7 @@
 from __future__ import annotations
 import asyncio
 import logging
-import yaml
 import uvicorn
-from pathlib import Path
 
 from chives.config import Config
 from chives.store import Store
@@ -27,16 +25,7 @@ async def main() -> None:
 
     memory_tools.init(store)
 
-    mcp_servers: list[dict] = []
-    if config.mcp_config_path:
-        p = Path(config.mcp_config_path)
-        if p.exists():
-            with p.open() as f:
-                mcp_config = yaml.safe_load(f)
-            mcp_servers = mcp_config.get("mcp_servers", [])
-        else:
-            logging.getLogger(__name__).warning("MCP config not found: %s", config.mcp_config_path)
-    await gateway_tools.init(mcp_servers)
+    await gateway_tools.init(config.gateway_url)
 
     agent = Agent(config, store)
     bus = Bus()
@@ -65,8 +54,8 @@ async def main() -> None:
     scheduler = Scheduler(config, agent.run, store, telegram)
     scheduler.start()
 
-    openwebui_app = create_app(agent.run, store, config)
-    register_editor_routes(openwebui_app, config)
+    openwebui_app = create_app(agent.run)
+    register_editor_routes(openwebui_app, config, store)
     server = uvicorn.Server(
         uvicorn.Config(openwebui_app, host="0.0.0.0", port=8080, log_level="warning")
     )

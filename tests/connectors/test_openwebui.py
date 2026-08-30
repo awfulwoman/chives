@@ -6,20 +6,7 @@ from fastapi.testclient import TestClient
 
 def _make_app(agent=None):
     from chives.connectors.openwebui import create_app
-    from chives.config import Config, LLMConfig
-
-    store = MagicMock()
-    store.stats.return_value = {
-        "turn_total": 0,
-        "turns_by_connector": {},
-        "memory_count": 0,
-        "pending_nudges": 0,
-        "email_seen_count": 0,
-        "last_turn": None,
-    }
-    config = MagicMock(spec=Config)
-    config.llm = LLMConfig()
-    return create_app(agent or AsyncMock(), store, config)
+    return create_app(agent or AsyncMock())
 
 
 async def test_list_models():
@@ -95,57 +82,3 @@ async def test_streaming_uses_last_user_message():
     )
 
     mock_agent.assert_awaited_once_with("second", "openwebui", "openwebui")
-
-
-async def test_ollama_list_models():
-    app = _make_app()
-    client = TestClient(app)
-    resp = client.get("/api/tags")
-    assert resp.status_code == 200
-    data = resp.json()
-    assert len(data["models"]) == 1
-    assert data["models"][0]["name"] == "chives:latest"
-
-
-async def test_ollama_chat_non_streaming():
-    app = _make_app(AsyncMock(return_value="All lights off."))
-    client = TestClient(app)
-    payload = {
-        "model": "chives:latest",
-        "messages": [{"role": "user", "content": "turn off lights"}],
-        "stream": False,
-    }
-    resp = client.post("/api/chat", json=payload)
-    assert resp.status_code == 200
-    data = resp.json()
-    assert data["message"]["role"] == "assistant"
-    assert data["message"]["content"] == "All lights off."
-    assert data["done"] is True
-
-
-async def test_ollama_chat_streaming():
-    app = _make_app(AsyncMock(return_value="Done."))
-    client = TestClient(app)
-    payload = {
-        "model": "chives:latest",
-        "messages": [{"role": "user", "content": "hello"}],
-        "stream": True,
-    }
-    resp = client.post("/api/chat", json=payload)
-    assert resp.status_code == 200
-    lines = [l for l in resp.text.strip().splitlines() if l]
-    assert len(lines) == 2
-    first = json.loads(lines[0])
-    assert first["message"]["content"] == "Done."
-    assert first["done"] is False
-    last = json.loads(lines[1])
-    assert last["done"] is True
-    assert last["done_reason"] == "stop"
-
-
-async def test_ollama_pull():
-    app = _make_app()
-    client = TestClient(app)
-    resp = client.post("/api/pull", json={"model": "chives:latest", "stream": False})
-    assert resp.status_code == 200
-    assert resp.json()["status"] == "success"

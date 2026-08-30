@@ -127,7 +127,7 @@ def _edit_page(filename: str, content: str) -> str:
 </html>"""
 
 
-def register_editor_routes(app: FastAPI, config: Config) -> None:
+def register_editor_routes(app: FastAPI, config: Config, store=None) -> None:
     """Mount authenticated GET/POST /editor routes for editing profile markdown files."""
     profile_dir = Path(config.profile_path)
     authenticate = _make_authenticator(config)

@@ -36,7 +36,11 @@ def slash_command_middleware():
                 "Commands:\n"
                 "/help — show this\n"
                 "/clear — clear conversation history\n"
+                "/brief — morning brief now\n"
             )
+        if msg.text.startswith("/brief"):
+            msg.text = "Generate the morning brief now."
+            return await next_handler(msg)
         return await next_handler(msg)
 
     return middleware
