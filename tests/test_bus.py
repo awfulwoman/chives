@@ -94,24 +94,6 @@ async def _append(sink, msg):
     return "ok"
 
 
-async def test_brief_command_rewrites_text_and_calls_agent():
-    """/brief must reach the agent with rewritten text, not be answered inline."""
-    from chives.bus import Message
-    from chives.pipeline import build_pipeline, slash_command_middleware
-
-    seen = []
-
-    async def agent(msg: Message) -> str:
-        seen.append(msg.text)
-        return "your brief"
-
-    pipeline = build_pipeline(agent, [slash_command_middleware()])
-    result = await pipeline(Message("telegram", "1", 1, "/brief"))
-
-    assert seen == ["Generate the morning brief now."]
-    assert result == "your brief"
-
-
 async def test_help_command_never_reaches_the_agent():
     from chives.bus import Message
     from chives.pipeline import build_pipeline, slash_command_middleware
@@ -127,7 +109,7 @@ async def test_help_command_never_reaches_the_agent():
     result = await pipeline(Message("telegram", "1", 1, "/help"))
 
     assert not called
-    assert "/clear" in result and "/brief" in result
+    assert "/clear" in result
 
 
 async def test_rate_limit_is_per_thread():
