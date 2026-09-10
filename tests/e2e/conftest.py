@@ -128,7 +128,7 @@ def gateway(tmp_path) -> ToolRecorder:
         "lookup_contact",
         "Look up a contact by name.",
         ["name"],
-        '[{"name": "Annisa", "phone": "+44 7700 900123"}]',
+        '[{"name": "Wifey", "phone": "+44 7700 900123"}]',
     )
     return rec
 
