@@ -1,13 +1,11 @@
 """
 Live integration tests for the chives instance.
 
-Run against the real server to check for availability, response times, and correctness.
+Run against a chives instance to check for availability, response times, and correctness.
+The default is a local instance; point it at the real server with CHIVES_LIVE_URL:
 
     uv run pytest tests/test_live.py -v -s
-
-Override the base URL:
-
-    CHIVES_LIVE_URL=http://localhost:8000 uv run pytest tests/test_live.py -v -s
+    CHIVES_LIVE_URL=https://chives.<domain> uv run pytest tests/test_live.py -v -s
 """
 from __future__ import annotations
 
@@ -19,7 +17,7 @@ import time
 import httpx
 import pytest
 
-BASE_URL = os.environ.get("CHIVES_LIVE_URL", "https://chives.ewwww.eu").rstrip("/")
+BASE_URL = os.environ.get("CHIVES_LIVE_URL", "http://localhost:8000").rstrip("/")
 
 # Generous timeout for a local LLM — the real concern is anything beyond this.
 RESPONSE_TIMEOUT = 60.0
